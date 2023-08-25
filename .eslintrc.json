@@ -1,0 +1,10 @@
+{
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "semi": [ 2, "always" ],
+    "quotes": [ 2, "double" ],
+    "no-warning-comments": "warn",
+    "no-trailing-spaces": "error",
+    "sort-imports": "error"
+  }
+}

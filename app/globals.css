@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TODO: make a light mode scheme */
+/* :root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  --header-height: 4rem;
+} */
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-rgb: 36, 36, 36;
+  --secondary-rgb: 66, 62, 62;
+  --tertiary-rgb: 57, 57, 57;
+  --accent-rgb: 25, 80, 33;
+  --header-height: 4rem;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background-color: rgb(var(--background-rgb));
+}
+
+input, textarea {
+  padding: 0.75rem;
+  border: 1px solid rgb(var(--secondary-rgb));
+  border-radius: 0.5rem;
+  background-color: rgb(var(--background-rgb));
+  resize: none;
+  overflow: auto;
+}
+
+input:disabled, textarea:disabled {
+  background-color: rgb(var(--secondary-rgb));
+}
+
+.main-wrapper {
+  height: calc(100vh - var(--header-height));
+}
