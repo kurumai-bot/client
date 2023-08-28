@@ -1,9 +1,9 @@
 import { Conversation, Message, SocketEvent, StartMessage, TTSMessage, User } from "./models";
 import GenericEvent, { GenericEventTarget } from "../genericEvent";
+import { Socket, io } from "socket.io-client";
 import protobuf, { Message as ProtoMessage, Root } from "protobufjs";
 import { ApiError } from "./errors";
 import { UUID } from "crypto";
-import { io } from "socket.io-client";
 // TODO: Consider switching to swr
 
 export const apiUrl = "http://localhost:5000/";
@@ -18,20 +18,31 @@ export type ClientEventMap = {
 export class Client extends GenericEventTarget<Client, ClientEventMap> {
   private static _protoRoot: Root | undefined;
 
+  private static _socketio: Socket;
+
   // Conversation and message objects shouldn't change, so a permanent cache should work
   readonly conversationCache = new Map<UUID, Conversation>();
   readonly messageCache = new Map<UUID, Message[]>();
   readonly pendingProcesses = new Set<UUID>();
 
-  readonly socketio = io(apiUrl, { withCredentials: true });
+  readonly socketio: Socket;
 
   private _currentUser: User | undefined;
 
   private constructor() {
     super();
 
-    // TOOD: expose pipeline id
+    // To make this a pure function, disconnect from any existing socket before initializing a new
+    // one.
+    if (Client._socketio !== undefined && !Client._socketio.disconnected) {
+      Client._socketio.disconnect();
+    }
+
+    Client._socketio = io(apiUrl, { withCredentials: true });
+    this.socketio = Client._socketio;
+
     const socketEventType = Client._protoRoot!.lookupType("kurumai.SocketEvent");
+    // TODO: expose pipeline id
     this.socketio.on("start", (buffer: ArrayBuffer) => {
       const socketEvent = protoToObject<SocketEvent>(
         socketEventType.decode(new Uint8Array(buffer))
@@ -109,6 +120,10 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     client._currentUser = (objSnakeToCamel(await res.json())) as User;
 
     return client;
+  }
+
+  disconnect() {
+    this.socketio.disconnect();
   }
 
   get currentUser() {

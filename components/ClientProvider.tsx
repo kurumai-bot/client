@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useState } from "react";
+import { createContext, useMemo } from "react";
 import { Client } from "@/lib/api/client";
 import suspend from "@/lib/suspend";
 
@@ -11,7 +11,7 @@ export default function ClientProvider({
 }: {
   children: React.ReactNode
 }) {
-  const [client, _] = useState(() => suspend(() => Client.connect(), []));
+  const client = useMemo(() => suspend(() => Client.connect(), []), []);
   return (
     <ClientContext.Provider value={client}>
       {children}
