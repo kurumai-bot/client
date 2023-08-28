@@ -1,4 +1,4 @@
-import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Message } from "protobufjs";
 import { useGraph } from "@react-three/fiber";
 import { useMemo } from "react";
@@ -270,28 +270,47 @@ export function protoToObject<T>(message: Message) {
 // This suspends a component while a promise is pending.
 // The promise has to be the same inbetween calls, essentially meaning the promise has to be
 // This is required for `Suspense` to work.
+const suspendKeys = new Array<Array<unknown>>;
+const suspendPromises = new Array<SuspendPromise<any>>;
 type SuspendPromise<T> = { _status: "fulfilled" | "pending" | "rejected", _res: T } & Promise<T>
-export function suspend<T>(promise: Promise<T>) {
-  const suspendPromise = promise as SuspendPromise<T>;
+export function suspend<T>(promiseFunc: () => Promise<T>, keys: Array<unknown>) {
+  // Check cache and if deps have changed
+  let promise: SuspendPromise<T>;
+  const idx = suspendKeys.findIndex(
+    (otherKeys) => otherKeys.every((otherKey, index) => otherKey === keys[index])
+  );
+  if (idx === -1) {
+    promise = promiseFunc() as SuspendPromise<T>;
+    suspendKeys.push(keys);
+    suspendPromises.push(promise);
+  } else {
+    promise = suspendPromises[idx];
+  }
 
-  switch (suspendPromise._status) {
+  // Check status of promise
+  switch (promise._status) {
     case "fulfilled":
-      return suspendPromise._res;
+      suspendKeys.splice(idx, 1);
+      suspendPromises.splice(idx, 1);
+      console.log(suspendPromises);
+      return promise._res;
     case "pending":
-      throw suspendPromise;
+      throw promise;
     case "rejected":
-      throw suspendPromise._res;
+      suspendKeys.splice(idx, 1);
+      suspendPromises.splice(idx, 1);
+      throw promise._res;
     default:
-      suspendPromise._status = "pending";
+      promise._status = "pending";
 
-      suspendPromise.then((val) => {
-        suspendPromise!._status = "fulfilled";
-        suspendPromise!._res = val;
+      promise.then((val) => {
+        promise!._status = "fulfilled";
+        promise!._res = val;
       }).catch((err) => {
-        suspendPromise!._status = "rejected";
-        suspendPromise!._res = err;
+        promise!._status = "rejected";
+        promise!._res = err;
       });
-      throw suspendPromise;
+      throw promise;
   }
 }
 
@@ -323,23 +342,15 @@ export function objSnakeToCamel(object: any) {
 
 // Used over three react fiber's `UseLoader` because it doesn't have support for raw data streams
 // Otherwise, this function is mostly equivalent to `UseLoader`
-let loaderPromise: Promise<GLTF> | undefined;
 export function useGLTF(data: ArrayBuffer | string) {
   const model = useMemo(() => {
     const loader = new GLTFLoader;
-    if (loaderPromise !== undefined) {
-      const retValue = suspend(loaderPromise);
-      loaderPromise = undefined;
-      return retValue;
-    } else if (typeof data === "string") {
-      loaderPromise = loader.loadAsync(data);
+    if (typeof data === "string") {
+      return suspend(() => loader.loadAsync(data), [data]);
     } else {
-      loaderPromise = loader.parseAsync(data, "");
+      return suspend(() => loader.parseAsync(data, ""), [data]);
     }
-    return suspend(loaderPromise);
   }, [data]);
-
-  console.log(model.scene);
 
   return Object.assign(model, useGraph(model.scene));
 }

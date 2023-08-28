@@ -1,30 +1,25 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useState } from "react";
 import ThreeJSModel from "./ThreeJSModel";
 import { suspend } from "@/lib/utils";
 
 export default function ModelHandler() {
-  const [modelData, setModelData] = useState<ArrayBuffer | string>("");
-  const filePromise = useRef<Promise<ArrayBuffer> | undefined>();
+  const [modelData, setModelData] = useState<ArrayBuffer | string | File>("");
 
-  if (filePromise.current !== undefined) {
-    const buffer = suspend(filePromise.current);
-    filePromise.current = undefined;
-    setModelData(buffer);
+  if (modelData instanceof File) {
+    setModelData(suspend(() => modelData.arrayBuffer(), [modelData]));
   }
 
   function onInputChange(ev: FormEvent) {
     const input = ev.target as HTMLInputElement;
-    filePromise.current = input.files![0].arrayBuffer();
-    // Need to cause rerender
-    setModelData(new ArrayBuffer(0));
+    setModelData(input.files![0]);
   }
 
   return (
     <>
       {
-        modelData !== ""
+        modelData !== "" &&  !(modelData instanceof File)
           ? <ThreeJSModel modelData={modelData} />
           : <div className="h-full flex justify-center items-center">
               <input type="file" onChange={onInputChange} accept=".gltf" />
