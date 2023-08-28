@@ -7,7 +7,6 @@ import { Message } from "@/lib/api/models";
 import { useClient } from "@/lib/hooks";
 
 export default function ChatMessages() {
-  // TODO: possible abstract this into hook that just does this all in one
   // TODO: this project desperately needs more comments
   const client = useClient();
   const [messages, setMessages] = useState<Array<Message>>([]);

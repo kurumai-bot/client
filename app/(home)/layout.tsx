@@ -11,7 +11,7 @@ export default function Layout({
   return (
     <ClientProvider>
       <nav className="border-b border-[color:rgb(var(--secondary-rgb))] h-[--header-height]">
-        <div className="float-right h-full flex items-center">
+        <div className="float-right h-full">
           <Image
             src="/pfp-placeholder.png"
             width={64}

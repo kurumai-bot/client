@@ -12,6 +12,7 @@ export default function ClientProvider({
   children: React.ReactNode
 }) {
   const client = useMemo(() => suspend(() => Client.connect(), []), []);
+
   return (
     <ClientContext.Provider value={client}>
       {children}

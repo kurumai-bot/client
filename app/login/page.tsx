@@ -3,7 +3,7 @@ import React from "react";
 
 export default function Page() {
   return (
-    <main className="h-full flex items-center justify-center">
+    <main className="flex-center">
       <Login />
     </main>
   );

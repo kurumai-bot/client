@@ -21,7 +21,8 @@ export default function ModelHandler() {
       {
         modelData !== "" &&  !(modelData instanceof File)
           ? <ThreeJSModel modelData={modelData} />
-          : <div className="h-full flex justify-center items-center">
+          : <div className="flex-center flex-col">
+              <label>Choose model file</label>
               <input type="file" onChange={onInputChange} accept=".gltf" />
             </div>
       }
