@@ -1,9 +1,10 @@
 "use client";
 
-import { GenericEvent, Microphone } from "@/lib/utils";
 import { useEffect, useRef } from "react";
+import GenericEvent from "@/lib/genericEvent";
+import Microphone from "@/lib/microphone";
 import { StartMessage } from "@/lib/api/models";
-import { useClient } from "./ClientProvider";
+import { useClient } from "@/lib/hooks";
 
 export default function ChatInput() {
   const client = useClient();

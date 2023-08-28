@@ -2,10 +2,11 @@
 
 import { AnimationAction, AnimationClip, AnimationMixer, Bone, Mesh, NumberKeyframeTrack, Vector3 } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { GenericEvent, Speaker, useGLTF } from "@/lib/utils";
+import { useClient, useGLTF } from "@/lib/hooks";
 import { useEffect, useRef } from "react";
+import GenericEvent from "@/lib/genericEvent";
+import Speaker from "@/lib/speaker";
 import { TTSMessage } from "@/lib/api/models";
-import { useClient } from "./ClientProvider";
 
 // This is needed because the internal component cant access ThreeJS hooks without being in a canvas
 export default function ThreeJSModel({

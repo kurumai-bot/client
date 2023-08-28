@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import ThreeJSModel from "./ThreeJSModel";
-import { suspend } from "@/lib/utils";
+import suspend from "@/lib/suspend";
 
 export default function ModelHandler() {
   const [modelData, setModelData] = useState<ArrayBuffer | string | File>("");

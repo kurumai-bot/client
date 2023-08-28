@@ -1,12 +1,7 @@
 import { Conversation, Message, SocketEvent, StartMessage, TTSMessage, User } from "./models";
-import {
-  GenericEvent,
-  GenericEventTarget,
-  makeRequest,
-  objSnakeToCamel,
-  protoToObject
-} from "../utils";
-import protobuf, { Root } from "protobufjs";
+import GenericEvent, { GenericEventTarget } from "../genericEvent";
+import protobuf, { Message as ProtoMessage, Root } from "protobufjs";
+import { ApiError } from "./errors";
 import { UUID } from "crypto";
 import { io } from "socket.io-client";
 // TODO: Consider switching to swr
@@ -189,4 +184,96 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
 
     this.dispatchEvent(new GenericEvent<Message[]>("message", [...messages]));
   }
+}
+
+export async function makeRequest(
+  url: string,
+  method: "delete" | "get" | "post" | "put",
+  queryParams: any = undefined,
+  body: any = undefined
+) {
+  const params: string[] = [];
+  if (queryParams !== undefined) {
+    for (let key in queryParams) {
+      if (queryParams[key] === undefined) {
+        continue;
+      }
+
+      params.push(`${key}=${queryParams[key]}`);
+    }
+  }
+
+  const res = await fetch(
+    url + "?" + params.join("&"),
+    {
+      method: method,
+      body: body === undefined ? undefined : JSON.stringify(body),
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      cache: "no-cache"
+    }
+  );
+
+  // TODO: Yea this is probably inadequate
+  if (!res.ok) {
+    throw new ApiError("Request failed with error: " + await res.text(), { cause: res });
+  }
+
+  return res;
+}
+
+export function protoToObject<T>(message: ProtoMessage) {
+  const type = message.$type;
+  const messageObj = type.toObject(message);
+
+  // Only need to convert timestamps
+  for (let key in type.fields) {
+    const field = type.fields[key];
+
+    if (messageObj[key] === undefined || field.resolvedType === null) {
+      continue;
+    } else if (field.resolvedType!.parent?.name === "kurumai") {
+      if (field.repeated) {
+        const arr = (message as any)[key] as Array<any>;
+        for (let i = 0; i < arr.length; i++) {
+          arr[i] = protoToObject(arr[i]);
+        }
+      } else {
+        messageObj[key] = protoToObject((message as any)[key]);
+      }
+    } else if (field.type === "google.protobuf.Timestamp") {
+      const timestamp = messageObj[key];
+      const seconds = timestamp["seconds"];
+      const nanos = timestamp["nanos"];
+      messageObj[key] = new Date(seconds * 1000 + Math.round(nanos / 1_000_000));
+    }
+  }
+
+  return messageObj as T;
+}
+
+export const snakeCaseRegex = /(?<=.)_+./gm;
+export function objSnakeToCamel(object: any) {
+  for (let key in object) {
+    // Remove key and convert it to camel, then readd the key to the object
+    const val = object[key];
+    delete object[key];
+
+    let i = 0;
+    for (let match of key.matchAll(snakeCaseRegex)) {
+      key =
+        key.slice(0, match.index! - i)
+        + match[0][1].toUpperCase()
+        + key.slice(match.index! + 2 - i++);
+    }
+
+    // Change keys recursively (this will also handle arrays)
+    if (val instanceof Object) {
+      objSnakeToCamel(val);
+    }
+
+    object[key] = val;
+  }
+
+  return object;
 }

@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import ChatMessage from "./ChatMessage";
-import { GenericEvent } from "@/lib/utils";
+import GenericEvent from "@/lib/genericEvent";
 import { Message } from "@/lib/api/models";
-import { useClient } from "./ClientProvider";
+import { useClient } from "@/lib/hooks";
 
 export default function ChatMessages() {
   // TODO: possible abstract this into hook that just does this all in one
