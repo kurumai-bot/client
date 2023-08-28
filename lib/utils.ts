@@ -1,4 +1,7 @@
+import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { Message } from "protobufjs";
+import { useGraph } from "@react-three/fiber";
+import { useMemo } from "react";
 
 // TODO: reconsider whether this file needs to exist
 
@@ -316,4 +319,27 @@ export function objSnakeToCamel(object: any) {
   }
 
   return object;
+}
+
+// Used over three react fiber's `UseLoader` because it doesn't have support for raw data streams
+// Otherwise, this function is mostly equivalent to `UseLoader`
+let loaderPromise: Promise<GLTF> | undefined;
+export function useGLTF(data: ArrayBuffer | string) {
+  const model = useMemo(() => {
+    const loader = new GLTFLoader;
+    if (loaderPromise !== undefined) {
+      const retValue = suspend(loaderPromise);
+      loaderPromise = undefined;
+      return retValue;
+    } else if (typeof data === "string") {
+      loaderPromise = loader.loadAsync(data);
+    } else {
+      loaderPromise = loader.parseAsync(data, "");
+    }
+    return suspend(loaderPromise);
+  }, [data]);
+
+  console.log(model.scene);
+
+  return Object.assign(model, useGraph(model.scene));
 }

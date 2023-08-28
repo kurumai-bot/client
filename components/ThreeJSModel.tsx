@@ -1,19 +1,32 @@
 "use client";
 
-import { AnimationAction, AnimationClip, AnimationMixer, Bone, KeyframeTrack, MathUtils, Mesh, NumberKeyframeTrack, Vector3 } from "three";
-import { GenericEvent, Speaker } from "@/lib/utils";
+import { AnimationAction, AnimationClip, AnimationMixer, Bone, Mesh, NumberKeyframeTrack, Vector3 } from "three";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { GenericEvent, Speaker, useGLTF } from "@/lib/utils";
 import { useEffect, useRef } from "react";
-import { useFrame, useLoader, useThree } from "@react-three/fiber";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { TTSMessage } from "@/lib/api/models";
 import { useClient } from "./ClientProvider";
 
-export default function ThreeModel({
-  modelUrl = ""
+// This is needed because the internal component cant access ThreeJS hooks without being in a canvas
+export default function ThreeJSModel({
+  modelData = ""
 }: {
-  modelUrl: string
+  modelData: string | ArrayBuffer
 }) {
-  const model = useLoader(GLTFLoader, modelUrl);
+  return (
+    <Canvas>
+      <ThreeJSModelInternal modelData={modelData} />
+      <ambientLight />
+    </Canvas>
+  );
+}
+
+export function ThreeJSModelInternal({
+  modelData = ""
+}: {
+  modelData: string | ArrayBuffer
+}) {
+  const model = useGLTF(modelData);
   const camera = useThree((state) => state.camera);
 
   const mixersRef = useRef(new Array<AnimationMixer>);
@@ -58,7 +71,7 @@ export default function ThreeModel({
 
     const camPos = headPos.add(new Vector3(0, 0, 0.25));
     camera.position.set(camPos.x, camPos.y, camPos.z);
-  }, [modelUrl]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [modelData]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     client.addEventListener("finish_gen", handleFinishGen);
