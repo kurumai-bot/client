@@ -39,7 +39,7 @@ export default function Login() {
         <label>
           Password
         </label>
-        <input type="text" name="password" className="mb-4" />
+        <input type="password" name="password" className="mb-4" />
         <input type="submit" className="bg-[color:rgb(var(--accent-rgb))]" />
       </form>
     </div>
