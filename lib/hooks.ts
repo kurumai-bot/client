@@ -7,12 +7,12 @@ import { useGraph } from "@react-three/fiber";
 // Used over three react fiber's `UseLoader` because it doesn't have support for raw data streams
 // Otherwise, this function is mostly equivalent to `UseLoader`
 export function useGLTF(data: ArrayBuffer | string) {
-  const model = useMemo(() => {
+  const model = suspend(() => {
     const loader = new GLTFLoader;
     if (typeof data === "string") {
-      return suspend(() => loader.loadAsync(data), [data]);
+      return loader.loadAsync(data);
     } else {
-      return suspend(() => loader.parseAsync(data, ""), [data]);
+      return loader.parseAsync(data, "");
     }
   }, [data]);
 

@@ -7,9 +7,12 @@ import suspend from "@/lib/suspend";
 export default function ModelHandler() {
   const [modelData, setModelData] = useState<ArrayBuffer | string | File>("");
 
-  if (modelData instanceof File) {
-    setModelData(suspend(() => modelData.arrayBuffer(), [modelData]));
-  }
+  suspend(async () => {
+    if (modelData instanceof File) {
+      const buffer = await modelData.arrayBuffer();
+      setModelData(buffer);
+    }
+  }, [modelData]);
 
   function onInputChange(ev: FormEvent) {
     const input = ev.target as HTMLInputElement;

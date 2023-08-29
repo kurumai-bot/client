@@ -1,52 +1,70 @@
 // This suspends a component while a promise is pending.
 // The promise has to be the same inbetween calls, essentially meaning the promise has to be
 // This is required for `Suspense` to work.
-const suspendKeys = new Array<Array<unknown>>;
-const suspendPromises = new Array<SuspendPromise<any>>;
-export type SuspendPromise<T> = {
-  _status: "fulfilled" | "pending" | "rejected", _res: T
-} & Promise<T>
+const cache = new Array<SuspendEntry<any>>;
+export interface SuspendEntry<T> {
+  status?: "fulfilled" | "pending" | "rejected"
+  result?: T
+  promise: Promise<T>
+  deps: Array<unknown>
+  deletionTime: Date
+  ttlSeconds: number
+}
 
-export default function suspend<T>(promiseFunc: () => Promise<T>, keys: Array<unknown>) {
-  // Check if deps match any in cache
-  let promise: SuspendPromise<T>;
-  const idx = suspendKeys.findIndex(
-    (otherKeys) => otherKeys.every((otherKey, index) => otherKey === keys[index])
-  );
+export default function suspend<T>(
+  promiseFunc: () => Promise<T>,
+  deps: Array<unknown>,
+  ttlSeconds?: number
+) {
+  // Validate cache and find if the given deps are already in the cache
+  const now = Date.now();
+  let idx = -1;
+  for (let i = 0; i < cache.length; i++) {
+    if (cache[i].deletionTime < new Date(now)) {
+      cache.splice(i, 1);
+      i--;
+    } else if (cache[i].deps.every((dep, k) => dep === deps[k])) {
+      idx = i;
+    }
+  }
 
+  let entry: SuspendEntry<T>;
   if (idx === -1) {
-    // If they don't create the promise
-    promise = promiseFunc() as SuspendPromise<T>;
-    suspendKeys.push(keys);
-    suspendPromises.push(promise);
+    // If it's not in the cache then create a new promise
+    ttlSeconds = ttlSeconds === undefined ? 900 : ttlSeconds;
+    entry = {
+      promise: promiseFunc(),
+      deps: deps,
+      deletionTime: new Date(now + ttlSeconds),
+      ttlSeconds: ttlSeconds
+    };
+    cache.push(entry);
   } else {
-    promise = suspendPromises[idx];
+    // If it is then update deletion time
+    entry = cache[idx];
+    entry.deletionTime = new Date(now + (ttlSeconds === undefined ? entry.ttlSeconds : ttlSeconds));
   }
 
   // Check status of promise
-  switch (promise._status) {
+  switch (entry.status) {
     case "fulfilled":
-      suspendKeys.splice(idx, 1);
-      suspendPromises.splice(idx, 1);
-      return promise._res;
+      return entry.result!;
     case "pending":
-      throw promise;
+      throw entry.result;
     case "rejected":
-      suspendKeys.splice(idx, 1);
-      suspendPromises.splice(idx, 1);
-      throw promise._res;
+      throw entry.result;
     default:
-      promise._status = "pending";
+      entry.status = "pending";
 
       // The removal of keys from the cache is not done in a `finally` in case the promise
       // resolves before `suspend` can be called again.
-      promise.then((val) => {
-        promise!._status = "fulfilled";
-        promise!._res = val;
+      entry.promise.then((val) => {
+        entry.status = "fulfilled";
+        entry.result = val;
       }).catch((err) => {
-        promise!._status = "rejected";
-        promise!._res = err;
+        entry.status = "rejected";
+        entry.result = err;
       });
-      throw promise;
+      throw entry.promise;
   }
 }
