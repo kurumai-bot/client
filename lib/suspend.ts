@@ -6,14 +6,14 @@ export interface SuspendEntry<T> {
   status?: "fulfilled" | "pending" | "rejected"
   result?: T
   promise: Promise<T>
-  deps: Array<unknown>
+  keys: Array<unknown>
   deletionTime: Date
   ttlSeconds: number
 }
 
 export default function suspend<T>(
   promiseFunc: () => Promise<T>,
-  deps: Array<unknown>,
+  keys: Array<unknown>,
   ttlSeconds?: number
 ) {
   // Validate cache and find if the given deps are already in the cache
@@ -23,7 +23,9 @@ export default function suspend<T>(
     if (cache[i].deletionTime < new Date(now)) {
       cache.splice(i, 1);
       i--;
-    } else if (cache[i].deps.every((dep, k) => dep === deps[k])) {
+    } else if (cache[i].keys.length === keys.length
+      && cache[i].keys.every((dep, k) => dep === keys[k])
+    ) {
       idx = i;
     }
   }
@@ -34,15 +36,16 @@ export default function suspend<T>(
     ttlSeconds = ttlSeconds === undefined ? 900 : ttlSeconds;
     entry = {
       promise: promiseFunc(),
-      deps: deps,
-      deletionTime: new Date(now + ttlSeconds),
+      keys: keys,
+      deletionTime: new Date(now + ttlSeconds * 1000),
       ttlSeconds: ttlSeconds
     };
     cache.push(entry);
   } else {
     // If it is then update deletion time
     entry = cache[idx];
-    entry.deletionTime = new Date(now + (ttlSeconds === undefined ? entry.ttlSeconds : ttlSeconds));
+    ttlSeconds = ttlSeconds === undefined ? entry.ttlSeconds : ttlSeconds;
+    entry.deletionTime = new Date(now + ttlSeconds * 1000);
   }
 
   // Check status of promise

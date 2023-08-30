@@ -1,7 +1,7 @@
-import { useContext, useMemo } from "react";
 import { ClientContext } from "@/components/ClientProvider";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import suspend from "./suspend";
+import { useContext } from "react";
 import { useGraph } from "@react-three/fiber";
 
 // Used over three react fiber's `UseLoader` because it doesn't have support for raw data streams
@@ -14,7 +14,8 @@ export function useGLTF(data: ArrayBuffer | string) {
     } else {
       return loader.parseAsync(data, "");
     }
-  }, [data]);
+  // The useGLTF key won't change, but ensures the key isn't used by another component
+  }, [data, "useGLTF"]);
 
   return Object.assign(model, useGraph(model.scene));
 }
