@@ -6,7 +6,7 @@ import { ApiError } from "./errors";
 import { UUID } from "crypto";
 // TODO: Consider switching to swr
 
-export const apiUrl = "http://localhost:5000/";
+export const apiUrl = "https://server.loukylor.dev/kurumai/";
 
 export type ClientEventMap = {
   "message": GenericEvent<Message[]>
@@ -38,7 +38,10 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
       Client._socketio.disconnect();
     }
 
-    Client._socketio = io(apiUrl, { withCredentials: true });
+    Client._socketio = io(
+      "https://server.loukylor.dev",
+      { path: "/kurumai/socket.io/", withCredentials: true }
+    );
     this.socketio = Client._socketio;
 
     const socketEventType = Client._protoRoot!.lookupType("kurumai.SocketEvent");
