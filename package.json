@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "protoc": "npx pbjs -t static-module messages.proto -w es6 -o proto_bundle.js & npx pbts proto_bundle.js -o proto_bundle.d.ts"
+    "protoc": "npx pbjs -t json messages.proto -o lib/api/messages.json"
   },
   "dependencies": {
     "@react-three/fiber": "^8.13.6",
