@@ -49,4 +49,5 @@ export interface SocketEvent {
   ttsMessage?: TTSMessage
   message?: Message
   startMessage?: StartMessage
+  conversation?: Conversation
 }

@@ -45,6 +45,15 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     this.socketio = Client._socketio;
 
     const socketEventType = Client._protoRoot!.lookupType("kurumai.SocketEvent");
+    this.socketio.on("send_message", (buffer: ArrayBuffer) => {
+      const socketEvent = protoToObject<SocketEvent>(
+        socketEventType.decode(new Uint8Array(buffer))
+      );
+      console.log(`send_message ${socketEvent}`);
+      if (socketEvent.message !== undefined)
+        this.addMessage(socketEvent.message);
+    });
+
     // TODO: expose pipeline id
     this.socketio.on("start", (buffer: ArrayBuffer) => {
       const socketEvent = protoToObject<SocketEvent>(
@@ -195,6 +204,10 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     }
 
     const messages = this.messageCache.get(message.conversationId)!;
+
+    if (messages.findIndex((val) => val.id === message.id) !== -1)
+      return;
+
     messages.unshift(message);
     if (messages.length > 100) {
       messages.pop();
