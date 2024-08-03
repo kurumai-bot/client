@@ -1,12 +1,11 @@
-import { Conversation, Message, SocketEvent, StartMessage, TTSMessage, User } from "./models";
+import { Conversation, Expression, Message, OpCodes, StartMessage, TTSMessage, User } from "./models";
 import GenericEvent, { GenericEventTarget } from "../genericEvent";
 import { Socket, io } from "socket.io-client";
-import protobuf, { Message as ProtoMessage, Root } from "protobufjs";
 import { ApiError } from "./errors";
 import { UUID } from "crypto";
 // TODO: Consider switching to swr
 
-export const apiUrl = "https://server.loukylor.dev/kurumai/";
+export const apiUrl = "http://localhost:8080/";
 
 export type ClientEventMap = {
   "message": GenericEvent<Message[]>
@@ -16,14 +15,14 @@ export type ClientEventMap = {
   "finish": Event
 }
 export class Client extends GenericEventTarget<Client, ClientEventMap> {
-  private static _protoRoot: Root | undefined;
-
   private static _socketio: Socket;
+  private static _textDecoder: TextDecoder = new TextDecoder();
 
   // Conversation and message objects shouldn't change, so a permanent cache should work
   readonly conversationCache = new Map<UUID, Conversation>();
   readonly messageCache = new Map<UUID, Message[]>();
   readonly pendingProcesses = new Set<UUID>();
+  readonly pendingWAVs = new Map<UUID, Uint8Array | [Message, Expression[]]>();
 
   readonly socketio: Socket;
 
@@ -39,63 +38,91 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     }
 
     Client._socketio = io(
-      "https://server.loukylor.dev",
-      { path: "/kurumai/socket.io/", withCredentials: true }
+      "http://localhost:8080/",
+      { path: "", withCredentials: true }
     );
     this.socketio = Client._socketio;
 
-    const socketEventType = Client._protoRoot!.lookupType("kurumai.SocketEvent");
     this.socketio.on("send_message", (buffer: ArrayBuffer) => {
-      const socketEvent = protoToObject<SocketEvent>(
-        socketEventType.decode(new Uint8Array(buffer))
-      );
+      const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
       console.log(`send_message ${socketEvent}`);
       if (socketEvent.message !== undefined)
         this.addMessage(socketEvent.message);
     });
 
     // TODO: expose pipeline id
-    this.socketio.on("start", (buffer: ArrayBuffer) => {
-      const socketEvent = protoToObject<SocketEvent>(
-        socketEventType.decode(new Uint8Array(buffer))
-      );
-      console.log(`start ${socketEvent}`);
-      this.pendingProcesses.add(socketEvent["id"] as UUID);
+    this.socketio.on((OpCodes.START as number).toString(), (buffer: ArrayBuffer) => {
+      const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
+      console.log("start", socketEvent);
+      this.pendingProcesses.add("00000000-0000-0000-0000-000000000000");
       this.dispatchEvent(new GenericEvent<StartMessage>(
-        "start",
-        socketEvent.startMessage as StartMessage
+        OpCodes[OpCodes.START].toLowerCase(),
+        socketEvent as StartMessage
       ));
     });
 
-    this.socketio.on("finish_asr", (buffer: ArrayBuffer) => {
-      const socketEvent = protoToObject<SocketEvent>(
-        socketEventType.decode(new Uint8Array(buffer))
-      );
+    this.socketio.on((OpCodes.FINISH_ASR as number).toString(), (buffer: ArrayBuffer) => {
+      const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
+      console.log("finish_asr", socketEvent);
       if (socketEvent.message === undefined) {
-        this.pendingProcesses.delete(socketEvent.id as UUID);
-        this.dispatchEvent(new GenericEvent<Message | undefined>("finish_asr", undefined));
+        this.pendingProcesses.delete("00000000-0000-0000-0000-000000000000");
+        this.dispatchEvent(new GenericEvent<Message | undefined>(
+          OpCodes[OpCodes.FINISH_ASR].toLowerCase(), undefined
+        ));
         return;
       }
 
       this.addMessage(socketEvent.message);
-      this.dispatchEvent(new GenericEvent<Message | undefined>("finish_asr", socketEvent.message));
+      this.dispatchEvent(new GenericEvent<Message | undefined>(
+        OpCodes[OpCodes.FINISH_ASR].toLowerCase(), socketEvent.message
+      ));
     });
 
-    this.socketio.on("finish_gen", (buffer: ArrayBuffer) => {
-      const socketEvent = protoToObject<SocketEvent>(
-        socketEventType.decode(new Uint8Array(buffer))
-      );
-      this.addMessage(socketEvent.ttsMessage!.message);
-      this.dispatchEvent(new GenericEvent<TTSMessage>("finish_gen", socketEvent.ttsMessage!));
+    this.socketio.on((OpCodes.FINISH_GEN as number).toString(), (buffer: ArrayBuffer) => {
+      const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
+      console.log("finish_gen", socketEvent);
+      this.addMessage(socketEvent.message);
+
+      // Send event if wav was already receieved. Add it to cache if it wasn't yet
+      const wav = this.pendingWAVs.get(socketEvent.wavId);
+      if (wav !== undefined) {
+        this.dispatchEvent(new GenericEvent<TTSMessage>(OpCodes[OpCodes.FINISH_GEN].toLowerCase(), {
+          "message": socketEvent.message,
+          "expressions": socketEvent.expressions,
+          "data": wav as Uint8Array
+        }));
+        this.pendingWAVs.delete(socketEvent.wavId);
+      }
+      else {
+        this.pendingWAVs.set(socketEvent.wavId, [socketEvent.message, socketEvent.expressions]);
+      }
     });
 
-    this.socketio.on("finish", (buffer: ArrayBuffer) => {
-      const socketEvent = protoToObject<SocketEvent>(
-        socketEventType.decode(new Uint8Array(buffer))
-      );
-      this.pendingProcesses.delete(socketEvent.id as UUID);
-      this.dispatchEvent(new Event("finish"));
-      console.log("finish");
+    this.socketio.on((OpCodes.FINISH_GEN_WAV as number).toString(), (buffer: ArrayBuffer) => {
+      const wavId = bytesToUUID(buffer);
+      const wav = new Uint8Array(buffer, 16);
+      console.log("finish_gen_wav", wavId, wav);
+
+      // Send event if message was already receieved. Add it to cache if it wasn't yet
+      const data = this.pendingWAVs.get(wavId) as [Message, Expression[]];
+      if (data !== undefined) {
+        this.dispatchEvent(new GenericEvent<TTSMessage>(OpCodes[OpCodes.FINISH_GEN].toLowerCase(), {
+          "message": data[0],
+          "expressions": data[1],
+          "data": wav as Uint8Array
+        }));
+        this.pendingWAVs.delete(wavId);
+      }
+      else {
+        this.pendingWAVs.set(wavId, wav);
+      }
+    });
+
+    this.socketio.on((OpCodes.FINISH as number).toString(), (buffer: ArrayBuffer) => {
+      const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
+      console.log("finish", socketEvent);
+      this.pendingProcesses.delete("00000000-0000-0000-0000-000000000000");
+      this.dispatchEvent(new Event(OpCodes[OpCodes.FINISH].toLowerCase()));
     });
   }
 
@@ -110,10 +137,6 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
   }
 
   static async connect(auth?: { username: string, password: string }) {
-    if (Client._protoRoot === undefined) {
-      Client._protoRoot = protobuf.Root.fromJSON(await import("./messages.json"));
-    }
-
     // Auth before connecting to the socket
     let res;
     if (auth === undefined) {
@@ -125,7 +148,6 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
         { "username": auth.username, "password": auth.password }
       );
     }
-
 
     const client = new Client;
 
@@ -142,9 +164,9 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     return this._currentUser!;
   }
 
-  async sendMessage(conversation_id: UUID, content: string) {
+  async sendMessage(conversationId: UUID, content: string) {
     const res = await makeRequest(
-      apiUrl + `conversations/${conversation_id}/messages`,
+      apiUrl + `conversations/${conversationId}/messages`,
       "post",
       undefined,
       { content: content }
@@ -161,19 +183,19 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
   }
 
   async getMessageHistory(
-    conversation_id: UUID,
+    conversationId: UUID,
     before: Date = new Date(0),
     after: Date = new Date(Date.now()),
     limit: number = 100
   ) {
     const res = await makeRequest(
-      apiUrl + `conversations/${conversation_id}/messages`,
+      apiUrl + `conversations/${conversationId}/messages`,
       "get",
       { before: before.toISOString(), after: after.toISOString(), limit: limit }
     );
 
     const messages = objSnakeToCamel(await res.json()) as Message[];
-    this.messageCache.set(conversation_id, messages);
+    this.messageCache.set(conversationId, messages);
 
     return messages;
   }
@@ -253,50 +275,16 @@ export async function makeRequest(
   return res;
 }
 
-export function protoToObject<T>(message: ProtoMessage) {
-  const type = message.$type;
-  const messageObj = type.toObject(message);
-
-  // Only need to convert timestamps
-  for (let key in type.fields) {
-    const field = type.fields[key];
-
-    if (messageObj[key] === undefined || field.resolvedType === null) {
-      continue;
-    } else if (field.resolvedType!.parent?.name === "kurumai") {
-      if (field.repeated) {
-        const arr = (message as any)[key] as Array<any>;
-        for (let i = 0; i < arr.length; i++) {
-          arr[i] = protoToObject(arr[i]);
-        }
-      } else {
-        messageObj[key] = protoToObject((message as any)[key]);
-      }
-    } else if (field.type === "google.protobuf.Timestamp") {
-      const timestamp = messageObj[key];
-      const seconds = timestamp["seconds"];
-      const nanos = timestamp["nanos"];
-      messageObj[key] = new Date(seconds * 1000 + Math.round(nanos / 1_000_000));
-    }
-  }
-
-  return messageObj as T;
-}
-
-export const snakeCaseRegex = /(?<=.)_+./gm;
-export function objSnakeToCamel(object: any) {
+const snakeCaseRegex = /(?<=.)_+./gm;
+function objSnakeToCamel(object: any) {
   for (let key in object) {
     // Remove key and convert it to camel, then readd the key to the object
     const val = object[key];
     delete object[key];
 
-    let i = 0;
-    for (let match of key.matchAll(snakeCaseRegex)) {
-      key =
-        key.slice(0, match.index! - i)
-        + match[0][1].toUpperCase()
-        + key.slice(match.index! + 2 - i++);
-    }
+    key = key.replaceAll(snakeCaseRegex,
+      (substr: string) => substr.slice(-1).toUpperCase()
+    );
 
     // Change keys recursively (this will also handle arrays)
     if (val instanceof Object) {
@@ -307,4 +295,9 @@ export function objSnakeToCamel(object: any) {
   }
 
   return object;
+}
+
+export function bytesToUUID(buffer: ArrayBuffer, offset: number = 0) {
+  const hex = Buffer.from(buffer, offset, 16).toString("hex");
+  return `${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}` as UUID
 }

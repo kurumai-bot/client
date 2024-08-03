@@ -6,8 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "protoc": "npx pbjs -t json messages.proto -o lib/api/messages.json"
+    "lint": "next lint"
   },
   "dependencies": {
     "@react-three/fiber": "^8.13.6",
@@ -19,9 +18,8 @@
     "bufferutil": "^4.0.7",
     "eslint": "8.43.0",
     "eslint-config-next": "13.4.6",
-    "next": "^13.4.9",
-    "postcss": "8.4.24",
-    "protobufjs": "~7.2.4",
+    "next": "^14.2.5",
+    "postcss": "^8.4.40",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "socket.io-client": "^4.7.1",

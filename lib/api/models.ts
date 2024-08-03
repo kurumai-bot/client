@@ -43,11 +43,14 @@ export interface Viseme {
   weight: number
 }
 
-export interface SocketEvent {
-  event: string
-  id: UUID
-  ttsMessage?: TTSMessage
-  message?: Message
-  startMessage?: StartMessage
-  conversation?: Conversation
+export enum OpCodes {
+  SET_PRESET = 1,
+  REMOVE_PRESET,
+  SEND_VOICE_DATA,
+  SEND_TEXT_DATA,
+  START,
+  FINISH_ASR,
+  FINISH_GEN,
+  FINISH_GEN_WAV,
+  FINISH
 }
