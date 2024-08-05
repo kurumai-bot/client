@@ -52,5 +52,6 @@ export enum OpCodes {
   FINISH_ASR,
   FINISH_GEN,
   FINISH_GEN_WAV,
-  FINISH
+  FINISH,
+  RECEIVE_MESSAGE
 }

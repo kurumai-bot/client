@@ -43,9 +43,9 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     );
     this.socketio = Client._socketio;
 
-    this.socketio.on("send_message", (buffer: ArrayBuffer) => {
+    this.socketio.on((OpCodes.RECEIVE_MESSAGE as number).toString(), (buffer: ArrayBuffer) => {
       const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
-      console.log(`send_message ${socketEvent}`);
+      console.log("receive_message", socketEvent);
       if (socketEvent.message !== undefined)
         this.addMessage(socketEvent.message);
     });
@@ -215,9 +215,7 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
   }
 
   sendMicData(data: ArrayBuffer) {
-    const micPacketType = Client._protoRoot!.lookupType("MicPacket");
-    const packet = micPacketType.encode({ data: new Uint8Array(data) });
-    this.socketio.emit("mic_packet", packet.finish());
+    this.socketio.emit((OpCodes.SEND_VOICE_DATA as number).toString(), data);
   }
 
   private addMessage(message: Message) {
@@ -300,4 +298,9 @@ function objSnakeToCamel(object: any) {
 export function bytesToUUID(buffer: ArrayBuffer, offset: number = 0) {
   const hex = Buffer.from(buffer, offset, 16).toString("hex");
   return `${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}` as UUID
+}
+
+export function UUIDToBytes(uuid: UUID) {
+  const bytes = uuid.match(/[a-fA-F0-9]{1,2}/g)!.map(hex => parseInt(hex, 16));
+  return Uint8Array.from(bytes);
 }
