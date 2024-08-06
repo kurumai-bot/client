@@ -2,11 +2,11 @@
 
 import { AnimationAction, AnimationClip, AnimationMixer, Bone, Mesh, NumberKeyframeTrack, Vector3 } from "three";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Message, TTSMessage } from "@/lib/api/models";
 import { useClient, useGLTF } from "@/lib/hooks";
 import { useEffect, useRef } from "react";
 import GenericEvent from "@/lib/genericEvent";
 import Speaker from "@/lib/speaker";
-import { TTSMessage } from "@/lib/api/models";
 
 // This is needed because the internal component cant access ThreeJS hooks without being in a canvas
 export default function ThreeJSModel({
@@ -76,9 +76,11 @@ export function ThreeJSModelInternal({
 
   useEffect(() => {
     client.addEventListener("finish_gen", handleFinishGen);
+    client.addEventListener("message", handleMessage);
 
     return () => {
       client.removeEventListener("finish_gen", handleFinishGen);
+      client.removeEventListener("message", handleMessage);
     };
   }, [client]);
 
@@ -112,6 +114,21 @@ export function ThreeJSModelInternal({
           visemeMapRef.current.set(viseme, map);
           map.set(mesh.uuid, mesh.morphTargetDictionary[shapeKey]);
         }
+      }
+    }
+  }
+
+  function handleMessage(ev: GenericEvent<Message[]>) {
+    if (ev.data[0].userId !== client.currentUser.id) {
+      return;
+    }
+
+    speakerRef.current.stop();
+    while (ttsQueueRef.current.length > 0) {
+      const item = ttsQueueRef.current.pop()!;
+      for (let action of item[1]) {
+        action.stop();
+        action.getMixer().uncacheAction(action.getClip());
       }
     }
   }
@@ -170,6 +187,7 @@ export function ThreeJSModelInternal({
     }
 
     // If nothing is playing then just play this one else add it to the queue
+    console.log(speakerRef.current.isPlaying);
     if (!speakerRef.current.isPlaying) {
       speakerRef.current.play(ev.data.data);
       for (let action of actions) {

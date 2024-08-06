@@ -45,7 +45,7 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
 
     this.socketio.on((OpCodes.RECEIVE_MESSAGE as number).toString(), (buffer: ArrayBuffer) => {
       const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
-      console.log("receive_message", socketEvent);
+      console.debug("receive_message", socketEvent);
       if (socketEvent.message !== undefined)
         this.addMessage(socketEvent.message);
     });
@@ -53,7 +53,7 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     // TODO: expose pipeline id
     this.socketio.on((OpCodes.START as number).toString(), (buffer: ArrayBuffer) => {
       const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
-      console.log("start", socketEvent);
+      console.debug("start", socketEvent);
       this.pendingProcesses.add("00000000-0000-0000-0000-000000000000");
       this.dispatchEvent(new GenericEvent<StartMessage>(
         OpCodes[OpCodes.START].toLowerCase(),
@@ -63,7 +63,7 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
 
     this.socketio.on((OpCodes.FINISH_ASR as number).toString(), (buffer: ArrayBuffer) => {
       const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
-      console.log("finish_asr", socketEvent);
+      console.debug("finish_asr", socketEvent);
       if (socketEvent.message === undefined) {
         this.pendingProcesses.delete("00000000-0000-0000-0000-000000000000");
         this.dispatchEvent(new GenericEvent<Message | undefined>(
@@ -80,7 +80,7 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
 
     this.socketio.on((OpCodes.FINISH_GEN as number).toString(), (buffer: ArrayBuffer) => {
       const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
-      console.log("finish_gen", socketEvent);
+      console.debug("finish_gen", socketEvent);
       this.addMessage(socketEvent.message);
 
       // Send event if wav was already receieved. Add it to cache if it wasn't yet
@@ -101,7 +101,7 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     this.socketio.on((OpCodes.FINISH_GEN_WAV as number).toString(), (buffer: ArrayBuffer) => {
       const wavId = bytesToUUID(buffer);
       const wav = new Uint8Array(buffer, 16);
-      console.log("finish_gen_wav", wavId, wav);
+      console.debug("finish_gen_wav", wavId, wav);
 
       // Send event if message was already receieved. Add it to cache if it wasn't yet
       const data = this.pendingWAVs.get(wavId) as [Message, Expression[]];
@@ -120,7 +120,7 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
 
     this.socketio.on((OpCodes.FINISH as number).toString(), (buffer: ArrayBuffer) => {
       const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
-      console.log("finish", socketEvent);
+      console.debug("finish", socketEvent);
       this.pendingProcesses.delete("00000000-0000-0000-0000-000000000000");
       this.dispatchEvent(new Event(OpCodes[OpCodes.FINISH].toLowerCase()));
     });
@@ -297,7 +297,7 @@ function objSnakeToCamel(object: any) {
 
 export function bytesToUUID(buffer: ArrayBuffer, offset: number = 0) {
   const hex = Buffer.from(buffer, offset, 16).toString("hex");
-  return `${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}` as UUID
+  return `${hex.substring(0, 8)}-${hex.substring(8, 12)}-${hex.substring(12, 16)}-${hex.substring(16, 20)}-${hex.substring(20, 32)}` as UUID;
 }
 
 export function UUIDToBytes(uuid: UUID) {

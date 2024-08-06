@@ -12,6 +12,7 @@ interface SpeakerProps {
 export default class Speaker extends GenericEventTarget<Speaker, SpeakerEventMap> {
   readonly context: AudioContext;
   private readonly queue = new Array<Uint8Array>;
+  private sourceNode?: AudioBufferSourceNode;
   private isSourcePlaying = false;
 
   public get isPlaying(): boolean {
@@ -40,13 +41,23 @@ export default class Speaker extends GenericEventTarget<Speaker, SpeakerEventMap
     );
     audioBuffer.copyToChannel(wav, 0);
 
-    const sourceNode = this.context.createBufferSource();
-    sourceNode.buffer = audioBuffer;
-    sourceNode.connect(this.context.destination);
-    sourceNode.addEventListener("ended", () => this.onBufferEnded());
+    this.sourceNode?.stop();
+    this.sourceNode?.disconnect();
+
+    this.sourceNode = this.context.createBufferSource();
+    this.sourceNode.buffer = audioBuffer;
+    this.sourceNode.connect(this.context.destination);
+    this.sourceNode.addEventListener("ended", () => this.onBufferEnded());
     this.isSourcePlaying = true;
-    sourceNode.start(0);
-    console.log("aksdjfa;skjdf");
+    this.sourceNode.start(0);
+  }
+
+  stop() {
+    this.queue.length = 0;
+    if (this.sourceNode !== undefined && this.isSourcePlaying) {
+      this.sourceNode.stop();
+      this.sourceNode.disconnect();
+    }
   }
 
   private onBufferEnded() {

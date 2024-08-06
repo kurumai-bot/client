@@ -40,7 +40,6 @@ export default function ChatInput() {
   }
 
   function handleMicrophoneData(ev: GenericEvent<Float32Array>) {
-    console.log(ev.data.reduce((a, b) => a + Math.abs(b)) / ev.data.length);
     client.sendMicData(ev.data.buffer);
   }
 
