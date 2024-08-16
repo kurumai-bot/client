@@ -1,11 +1,11 @@
-import { Conversation, Expression, Message, OpCodes, StartMessage, TTSMessage, User } from "./models";
+import { Conversation, Emotion, Expression, Message, OpCodes, StartMessage, TTSMessage, User } from "./models";
 import GenericEvent, { GenericEventTarget } from "../genericEvent";
 import { Socket, io } from "socket.io-client";
 import { ApiError } from "./errors";
 import { UUID } from "crypto";
 // TODO: Consider switching to swr
 
-export const apiUrl = "http://localhost:8080/";
+export const apiUrl = "https://server.loukylor.dev/kurumai/";
 
 export type ClientEventMap = {
   "message": GenericEvent<Message[]>
@@ -22,7 +22,7 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
   readonly conversationCache = new Map<UUID, Conversation>();
   readonly messageCache = new Map<UUID, Message[]>();
   readonly pendingProcesses = new Set<UUID>();
-  readonly pendingWAVs = new Map<UUID, Uint8Array | [Message, Expression[]]>();
+  readonly pendingWAVs = new Map<UUID, Uint8Array | [Message, Expression[], Emotion]>();
 
   readonly socketio: Socket;
 
@@ -38,8 +38,8 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     }
 
     Client._socketio = io(
-      "http://localhost:8080/",
-      { path: "", withCredentials: true }
+      "https://server.loukylor.dev",
+      { path: "/kurumai/socket.io/", withCredentials: true }
     );
     this.socketio = Client._socketio;
 
@@ -50,7 +50,6 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
         this.addMessage(socketEvent.message);
     });
 
-    // TODO: expose pipeline id
     this.socketio.on((OpCodes.START as number).toString(), (buffer: ArrayBuffer) => {
       const socketEvent = objSnakeToCamel(JSON.parse(Client._textDecoder.decode(buffer)));
       console.debug("start", socketEvent);
@@ -89,12 +88,17 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
         this.dispatchEvent(new GenericEvent<TTSMessage>(OpCodes[OpCodes.FINISH_GEN].toLowerCase(), {
           "message": socketEvent.message,
           "expressions": socketEvent.expressions,
+          "emotion": socketEvent.emotion,
           "data": wav as Uint8Array
         }));
         this.pendingWAVs.delete(socketEvent.wavId);
       }
       else {
-        this.pendingWAVs.set(socketEvent.wavId, [socketEvent.message, socketEvent.expressions]);
+        this.pendingWAVs.set(socketEvent.wavId, [
+          socketEvent.message,
+          socketEvent.expressions,
+          socketEvent.emotion
+        ]);
       }
     });
 
@@ -104,11 +108,12 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
       console.debug("finish_gen_wav", wavId, wav);
 
       // Send event if message was already receieved. Add it to cache if it wasn't yet
-      const data = this.pendingWAVs.get(wavId) as [Message, Expression[]];
+      const data = this.pendingWAVs.get(wavId) as [Message, Expression[], Emotion];
       if (data !== undefined) {
         this.dispatchEvent(new GenericEvent<TTSMessage>(OpCodes[OpCodes.FINISH_GEN].toLowerCase(), {
           "message": data[0],
           "expressions": data[1],
+          "emotion": data[2],
           "data": wav as Uint8Array
         }));
         this.pendingWAVs.delete(wavId);
@@ -184,8 +189,8 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
 
   async getMessageHistory(
     conversationId: UUID,
-    before: Date = new Date(0),
-    after: Date = new Date(Date.now()),
+    before: Date = new Date(Date.now()),
+    after: Date = new Date(0),
     limit: number = 100
   ) {
     const res = await makeRequest(

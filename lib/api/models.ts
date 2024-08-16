@@ -30,7 +30,8 @@ export interface StartMessage {
 export interface TTSMessage {
   message: Message
   expressions: Expression[]
-  data: Uint8Array;
+  emotion: Emotion
+  data: Uint8Array
 }
 
 export interface Expression {
@@ -55,3 +56,5 @@ export enum OpCodes {
   FINISH,
   RECEIVE_MESSAGE
 }
+
+export type Emotion = "happy" | "sad" | "angry" | "neutral"
