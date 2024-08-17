@@ -30,7 +30,9 @@ export function ThreeJSModelInternal({
   const model = useGLTF(modelData);
   const camera = useThree((state) => state.camera);
 
+  // Contains current mixers. There is one mixer per mesh on the model
   const mixersRef = useRef(new Array<AnimationMixer>);
+  // Maps viseme to mesh and shapekey
   const visemeMapRef = useRef(new Map<VisemeEnum, Map<string, number>>);
   const currentExpressionRef = useRef<{ index: number, absoluteStartTime: number } | null>(null);
   const ttsQueueRef = useRef(new Array<[Uint8Array, Array<AnimationAction>]>);
@@ -82,7 +84,7 @@ export function ThreeJSModelInternal({
       client.removeEventListener("finish_gen", handleFinishGen);
       client.removeEventListener("message", handleMessage);
     };
-  }, [client]);
+  }, [client]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useFrame((_, delta) => {
     for (let mixer of mixersRef.current) {
@@ -187,7 +189,6 @@ export function ThreeJSModelInternal({
     }
 
     // If nothing is playing then just play this one else add it to the queue
-    console.log(speakerRef.current.isPlaying);
     if (!speakerRef.current.isPlaying) {
       speakerRef.current.play(ev.data.data);
       for (let action of actions) {
