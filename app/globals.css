@@ -7,16 +7,18 @@
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
-  --header-height: 4rem;
+  --sidebar-width: 4rem;
 } */
 
 :root {
-  --foreground-rgb: 255, 255, 255;
-  --background-rgb: 36, 36, 36;
-  --secondary-rgb: 66, 62, 62;
-  --tertiary-rgb: 57, 57, 57;
+  --foreground-rgb: 240, 240, 240;
+  --background-rgb: 21, 21, 20;
+  --secondary-rgb: 24, 25, 24;
+  --tertiary-rgb: 44, 45, 44;
+  --border-rgb: 80, 80, 80;
   --accent-rgb: 25, 80, 33;
-  --header-height: 4rem;
+  --sidebar-width: 4rem;
+  --header-height: 2rem;
 }
 
 body {
@@ -26,19 +28,15 @@ body {
 
 input, textarea {
   padding: 0.75rem;
-  border: 1px solid rgb(var(--secondary-rgb));
+  border: 1px solid rgb(var(--border-rgb));
   border-radius: 0.5rem;
-  background-color: rgb(var(--background-rgb));
+  background-color: rgb(var(--secondary-rgb));
   resize: none;
   overflow: auto;
 }
 
 input:disabled, textarea:disabled {
-  background-color: rgb(var(--secondary-rgb));
-}
-
-.main-wrapper {
-  height: calc(100vh - var(--header-height));
+  background-color: rgb(var(--tertiary-rgb));
 }
 
 .flex-center {
