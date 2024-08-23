@@ -27,7 +27,7 @@ export default function ChatMessages() {
   }
 
   return (
-    <div className="flex max-h-full flex-1 overflow-y-auto flex-col-reverse">
+    <div className="flex max-h-full flex-1 flex-col-reverse overflow-y-auto">
       {[...messages].map((val, _) => {
         const side = val.userId === client.currentUser.id ? "right" : "left";
         const color = val.userId === client.currentUser.id

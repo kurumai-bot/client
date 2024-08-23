@@ -14,8 +14,8 @@ export default function ChatMessage({
   const alignSelf = side == "right" ? "self-end" : "self-start";
 
   return (
-    <div className={`max-w-[75%] float-${side} ${alignSelf} my-5 break-words`}>
-      <div className={"p-3 rounded-lg"} style={{"backgroundColor": color}}>
+    <div className={`float-${side} my-5 max-w-[75%] ${alignSelf} break-words`}> { /* eslint-disable-line tailwindcss/no-custom-classname */ }
+      <div className={"rounded-lg p-3"} style={{"backgroundColor": color}}>
         {children}
       </div>
     </div>

@@ -28,7 +28,7 @@ export default function Login() {
 
   return (
     <div>
-      <h1 className="mb-3 text-3xl text-center">
+      <h1 className="mb-3 text-center text-3xl">
         Login
       </h1>
       <form className="flex flex-col" onSubmit={onSubmit}>

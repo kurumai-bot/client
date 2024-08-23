@@ -93,7 +93,7 @@ export default function ChatInput() {
   return (
     <div className="flex max-h-[40%] basis-auto items-center gap-3">
       <textarea ref={inputRef} onKeyDown={handleInputKeyDown} onInput={handleOnInput} rows={1} placeholder="Say something" className="max-h-full flex-1"/>
-      <div className="w-12 h-12 bg-green-100" onClick={handleMicrophoneButtonClick}>
+      <div className="size-12 bg-green-100" onClick={handleMicrophoneButtonClick}>
 
       </div>
     </div>
