@@ -39,6 +39,25 @@ input:disabled, textarea:disabled {
   background-color: rgb(var(--tertiary-rgb));
 }
 
+::-webkit-scrollbar {
+  background-color: rgb(var(--tertiary-rgb));
+}
+
+/* I don't want to define new colors, so just use this hacky solution */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--border-rgb), 0.7);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--border-rgb), 1);
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  body {
+    scrollbar-color: rgb(var(--tertiary-rgb)) rgba(var(--border-rgb), 0.7);
+  }
+}
+
 .flex-center {
   height: 100%;
   display: flex;
