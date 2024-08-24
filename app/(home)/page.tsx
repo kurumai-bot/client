@@ -8,6 +8,7 @@ import ConversationList from "@/components/ConversationList";
 import Image from "next/image";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import ModelLoader from "@/components/ModelHandler";
+import ThemeSwitcher from "@/components/ThemeSwitcher";
 import dynamic from "next/dynamic";
 
 const ClientProvider = dynamic(() => import("@/components/ClientProvider"), { ssr: false });
@@ -37,6 +38,7 @@ export default function Page() {
                 className="float-right h-full w-auto rounded-full p-3 opacity-75 hover:opacity-90"
               />
             </a>
+            <ThemeSwitcher />
             <a href="/faq" className="flex-center float-right p-2 text-lg">
               FAQ
             </a>
