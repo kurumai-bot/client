@@ -31,13 +31,15 @@ export default function ThemeSwitcher() {
   }
 
   return (
-    <Image
-      src={currentTheme === "dark" ? "/dark-theme-logo" : "/light-theme-logo"}
-      onClick={() => setCurrentTheme(currentTheme === "dark" ? "light" : "dark")}
-      width={64}
-      height={64}
-      alt="switch to dark theme"
-      className="float-right h-full w-auto rounded-full p-3 opacity-75 hover:cursor-pointer hover:opacity-90"
-    />
+    <button className="float-right h-full">
+      <Image
+        src={currentTheme === "dark" ? "/dark-theme-logo" : "/light-theme-logo"}
+        onClick={() => setCurrentTheme(currentTheme === "dark" ? "light" : "dark")}
+        width={64}
+        height={64}
+        alt="switch to dark theme"
+        className="size-full rounded-full p-3 opacity-75 hover:cursor-pointer hover:opacity-90"
+      />
+    </button>
   );
 }

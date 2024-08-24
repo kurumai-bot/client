@@ -21,6 +21,7 @@ export default function Login() {
     });
   }
 
+  // TODO: update colors
   // redirect can't be used in callbacks, only during render, so a workaround like this is needed.
   if (shouldRedirect) {
     redirect("/", RedirectType.push);
@@ -40,7 +41,7 @@ export default function Login() {
           Password
         </label>
         <input type="password" name="password" className="mb-4" />
-        <input type="submit" className="bg-[color:rgb(var(--accent-rgb))]" />
+        <input type="submit" className="text-[var(--color-on-primary)] bg-[var(--color-primary)]" />
       </form>
     </div>
   );

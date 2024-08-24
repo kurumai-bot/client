@@ -39,17 +39,17 @@ export default function Page() {
               />
             </a>
             <ThemeSwitcher />
-            <a href="/faq" className="flex-center float-right p-2 text-lg">
+            <a href="/faq" className="flex-center float-right px-2.5 py-2 text-lg">
               FAQ
             </a>
           </nav>
           <div className="h-[calc(100%-var(--header-height))] pb-3 pr-3">
-            <main className="rounded-lg border border-[color:rgb(var(--border-rgb))] bg-[rgb(var(--secondary-rgb))] lg:flex lg:h-full lg:flex-row-reverse">
+            <main className="rounded-lg border border-[color:var(--color-outline-variant)] bg-[var(--color-surface-container)] lg:flex lg:h-full lg:flex-row-reverse">
               <div className="flex max-h-full min-w-0 flex-1 flex-col p-2.5 lg:p-10">
                 <ChatMessages />
                 <ChatInput />
               </div>
-              <div className="shrink-0 grow-0 basis-3/5 border-t border-[color:rgb(var(--border-rgb))] lg:border-r lg:border-t-0">
+              <div className="shrink-0 grow-0 basis-3/5 border-t border-[color:var(--color-outline-variant)] lg:border-r lg:border-t-0">
                 <Suspense fallback={<div className="flex-center"><LoadingSpinner radius={60} strokeWidth={10} /></div>}>
                   <ModelLoader />
                 </Suspense>

@@ -16,7 +16,7 @@ export default function ConversationButton({
   const [_, setCurrentConveration] = useContext(ConversationContext);
 
   return (
-    <button onClick={() => setCurrentConveration(conversation)} className={"mb-1 flex h-12 items-center rounded-lg  px-2 py-1 hover:opacity-70 " + (selected ? "bg-[rgb(var(--tertiary-rgb))]" : "bg-[var(--background-rgb)]")}>
+    <button onClick={() => setCurrentConveration(conversation)} className={"mb-1 flex h-12 items-center rounded-lg  px-2 py-1 hover:bg-[var(--color-surface-container-high)] " + (selected ? "bg-[var(--color-surface-container-highest)]" : "bg-[var(--color-background)]")}>
       <div className="h-full">
         <Image
           src="/pfp-placeholder.png"

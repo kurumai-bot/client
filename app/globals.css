@@ -11,12 +11,41 @@
 } */
 
 :root, html[data-theme='dark'] {
-  --foreground-rgb: 240, 240, 240;
-  --background-rgb: 21, 21, 20;
-  --secondary-rgb: 24, 25, 24;
-  --tertiary-rgb: 44, 45, 44;
-  --border-rgb: 80, 80, 80;
-  --accent-rgb: 25, 80, 33;
+  --color-primary: rgb(159 212 156);
+  --color-surface-tint: rgb(159 212 156);
+  --color-on-primary: rgb(6 57 17);
+  --color-primary-container: rgb(33 80 38);
+  --color-on-primary-container: rgb(186 240 182);
+  --color-secondary: rgb(185 204 180);
+  --color-on-secondary: rgb(37 52 36);
+  --color-secondary-container: rgb(59 75 57);
+  --color-on-secondary-container: rgb(213 232 207);
+  --color-tertiary: rgb(161 206 213);
+  --color-on-tertiary: rgb(0 54 60);
+  --color-tertiary-container: rgb(31 77 83);
+  --color-on-tertiary-container: rgb(188 235 241);
+  --color-error: rgb(255 180 171);
+  --color-on-error: rgb(105 0 5);
+  --color-error-container: rgb(147 0 10);
+  --color-on-error-container: rgb(255 218 214);
+  --color-background: rgb(16 20 15);
+  --color-on-background: rgb(224 228 219);
+  --color-surface: rgb(16 20 15);
+  --color-on-surface: rgb(224 228 219);
+  --color-surface-variant: rgb(66 73 64);
+  --color-on-surface-variant: rgb(194 201 189);
+  --color-outline: rgb(140 147 136);
+  --color-outline-variant: rgb(66 73 64);
+  --color-inverse-surface: rgb(224 228 219);
+  --color-inverse-on-surface: rgb(45 50 44);
+  --color-inverse-primary: rgb(57 105 59);
+  --color-surface-dim: rgb(16 20 15);
+  --color-surface-bright: rgb(54 58 52);
+  --color-surface-container-lowest: rgb(11 15 10);
+  --color-surface-container-low: rgb(24 29 23);
+  --color-surface-container: rgb(28 33 27);
+  --color-surface-container-high: rgb(39 43 37);
+  --color-surface-container-highest: rgb(50 54 48);
   --sidebar-width: 12rem;
   --header-height: 3rem;
 }
@@ -28,44 +57,52 @@ html[data-theme='light'] {
   --tertiary-rgb: 44, 45, 44;
   --border-rgb: 80, 80, 80;
   --accent-rgb: 25, 80, 33;
-  --sidebar-width: 12rem;
-  --header-height: 3rem;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background-color: rgb(var(--background-rgb));
+  color: var(--color-on-surface);
+  background-color: var(--color-background);
+  border-color: var(--color-outline-variant);
 }
 
 input, textarea {
   padding: 0.75rem;
-  border: 1px solid rgb(var(--border-rgb));
   border-radius: 0.5rem;
-  background-color: rgb(var(--secondary-rgb));
+  background-color: var(--color-surface-container);
+  border: 1px solid var(--color-outline); 
   resize: none;
   overflow: auto;
 }
 
+input:active, textarea:focus {
+  background-color: var(--color-secondary-container-high);
+}
+
 input:disabled, textarea:disabled {
-  background-color: rgb(var(--tertiary-rgb));
+  opacity: 0.38;
 }
 
 ::-webkit-scrollbar {
-  background-color: rgb(var(--tertiary-rgb));
+  width: 0.7rem;
+  background-color: inherit;
 }
 
 /* I don't want to define new colors, so just use this hacky solution */
 ::-webkit-scrollbar-thumb {
-  background-color: rgba(var(--border-rgb), 0.7);
+  background-color: var(--color-surface-container-high);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(var(--border-rgb), 1);
+  background-color: var(--color-surface-container-highest);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background-color: var(--color-surface-variant);
 }
 
 @supports not selector(::-webkit-scrollbar) {
   body {
-    scrollbar-color: rgb(var(--tertiary-rgb)) rgba(var(--border-rgb), 0.7);
+    scrollbar-color: inherit var(--color-surface-container-high);
   }
 }
 

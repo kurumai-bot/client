@@ -31,11 +31,14 @@ export default function ChatMessages() {
       {[...messages].map((val, _) => {
         const side = val.userId === client.currentUser.id ? "right" : "left";
         const color = val.userId === client.currentUser.id
-          ? "rgb(var(--accent-rgb))"
-          : "rgb(var(--tertiary-rgb))";
+          ? "var(--color-primary-container)"
+          : "var(--color-surface-container-high)";
+        const textColor = val.userId === client.currentUser.id
+          ? "var(--color-on-primary-container)"
+          : "var(--color-on-surface-container"
 
         return (
-          <ChatMessage key={val.id} side={side} color={color}>
+          <ChatMessage key={val.id} side={side} color={color} textColor={textColor}>
             {val.content}
           </ChatMessage>
         );
