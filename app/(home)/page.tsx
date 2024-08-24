@@ -34,7 +34,7 @@ export default function Page() {
                 width={64}
                 height={64}
                 alt="github project link"
-                className="float-right h-full w-auto rounded-full p-3"
+                className="float-right h-full w-auto rounded-full p-3 opacity-75 hover:opacity-90"
               />
             </a>
             <a href="/faq" className="flex-center float-right p-2 text-lg">
@@ -43,7 +43,7 @@ export default function Page() {
           </nav>
           <div className="h-[calc(100%-var(--header-height))] pb-3 pr-3">
             <main className="rounded-lg border border-[color:rgb(var(--border-rgb))] bg-[rgb(var(--secondary-rgb))] lg:flex lg:h-full lg:flex-row-reverse">
-              <div className="flex max-h-[90svh] min-w-0 flex-1 flex-col p-2.5 lg:p-10">
+              <div className="flex max-h-full min-w-0 flex-1 flex-col p-2.5 lg:p-10">
                 <ChatMessages />
                 <ChatInput />
               </div>

@@ -10,7 +10,7 @@ export default function ChatMessage({
   color = "#121212",
   side = "right",
   children = null
-}: ChatMessageProps = {}) {
+}: ChatMessageProps) {
   const alignSelf = side == "right" ? "self-end" : "self-start";
 
   return (
