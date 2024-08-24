@@ -17,8 +17,8 @@
   --tertiary-rgb: 44, 45, 44;
   --border-rgb: 80, 80, 80;
   --accent-rgb: 25, 80, 33;
-  --sidebar-width: 4rem;
-  --header-height: 2rem;
+  --sidebar-width: 12rem;
+  --header-height: 3rem;
 }
 
 body {
