@@ -4,6 +4,7 @@ import { ApiError } from "@/lib/api/errors";
 import { RedirectType } from "next/dist/client/components/redirect";
 import { redirect } from "next/navigation";
 
+// TODO: handle errors not badly
 export default function Error({
   error,
   reset,

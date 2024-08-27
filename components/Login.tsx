@@ -41,7 +41,7 @@ export default function Login() {
           Password
         </label>
         <input type="password" name="password" className="mb-4" />
-        <input type="submit" className="text-[var(--color-on-primary)] bg-[var(--color-primary)]" />
+        <input type="submit" className="bg-[var(--color-primary)] text-[var(--color-on-primary)]" />
       </form>
     </div>
   );
