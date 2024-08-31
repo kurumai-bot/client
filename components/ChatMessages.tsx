@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ChatMessage from "./ChatMessage";
+import { ConversationContext } from "@/app/(home)/page";
 import GenericEvent from "@/lib/genericEvent";
 import { Message } from "@/lib/api/models";
 import { useClient } from "@/lib/hooks";
@@ -9,18 +10,24 @@ import { useClient } from "@/lib/hooks";
 export default function ChatMessages() {
   // TODO: this project desperately needs more comments
   const client = useClient();
+  const [currentConversation, _] = useContext(ConversationContext);
   const [messages, setMessages] = useState<Array<Message>>([]);
 
   useEffect(() => {
     client.addEventListener("message", handleMessage);
-    client.getConversations().then((conversations) => {
-      client.getMessageHistory(conversations[0].id).then(setMessages);
-    });
 
     return () => {
       client.removeEventListener("message", handleMessage);
     };
   }, [client]);
+
+  useEffect(() => {
+    if (currentConversation === undefined) {
+      return;
+    }
+
+    client.getMessageHistory(currentConversation.id).then(setMessages);
+  }, [client, currentConversation]);
 
   function handleMessage(ev: GenericEvent<Array<Message>>) {
     setMessages(ev.data);
@@ -35,7 +42,7 @@ export default function ChatMessages() {
           : "var(--color-surface-container-high)";
         const textColor = val.userId === client.currentUser.id
           ? "var(--color-on-primary-container)"
-          : "var(--color-on-surface-container"
+          : "var(--color-on-surface-container";
 
         return (
           <ChatMessage key={val.id} side={side} color={color} textColor={textColor}>

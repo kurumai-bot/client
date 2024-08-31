@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
+import { ConversationContext } from "@/app/(home)/page";
 import GenericEvent from "@/lib/genericEvent";
 import Microphone from "@/lib/microphone";
 import { StartMessage } from "@/lib/api/models";
@@ -8,6 +9,7 @@ import { useClient } from "@/lib/hooks";
 
 export default function ChatInput() {
   const client = useClient();
+  const [currentConversation, _] = useContext(ConversationContext);
 
   const inputRef = useRef<HTMLTextAreaElement>(null!);
 
@@ -53,7 +55,7 @@ export default function ChatInput() {
       if (inputRef.current.value != "") {
         const content = inputRef.current.value;
         // TODO: temp
-        client.sendMessage("972878d5-3e81-490a-a19a-69c22f572160", content);
+        client.sendMessage(currentConversation!.id, content);
         inputRef.current.value = "";
         inputRef.current.style.height = "";
 
