@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext, useEffect, useRef } from "react";
-import { ConversationContext } from "@/app/(home)/page";
+import { ConversationContext } from "./ContextProviders";
 import GenericEvent from "@/lib/genericEvent";
 import Microphone from "@/lib/microphone";
 import { StartMessage } from "@/lib/api/models";

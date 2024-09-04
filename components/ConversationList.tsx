@@ -3,7 +3,7 @@
 import { useContext, useEffect, useState } from "react";
 import { Conversation } from "@/lib/api/models";
 import ConversationButton from "./ConversationButton";
-import { ConversationContext } from "@/app/(home)/page";
+import { ConversationContext } from "./ContextProviders";
 import { useClient } from "@/lib/hooks";
 
 export default function ConversationList() {

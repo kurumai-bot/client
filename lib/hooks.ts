@@ -1,4 +1,4 @@
-import { ClientContext } from "@/components/ClientProvider";
+import { ClientContext } from "@/components/ContextProviders";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import suspend from "./suspend";
 import { useContext } from "react";

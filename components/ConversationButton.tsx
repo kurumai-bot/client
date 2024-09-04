@@ -1,7 +1,6 @@
 import { Conversation } from "@/lib/api/models";
-import { ConversationContext } from "@/app/(home)/page";
+import { ConversationContext } from "./ContextProviders";
 import Image from "next/image";
-import { UUID } from "crypto";
 import { useContext } from "react";
 
 export interface ConversationButtonProps {

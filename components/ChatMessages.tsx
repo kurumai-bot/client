@@ -2,7 +2,7 @@
 
 import { useContext, useEffect, useState } from "react";
 import ChatMessage from "./ChatMessage";
-import { ConversationContext } from "@/app/(home)/page";
+import { ConversationContext } from "./ContextProviders";
 import GenericEvent from "@/lib/genericEvent";
 import { Message } from "@/lib/api/models";
 import { useClient } from "@/lib/hooks";
