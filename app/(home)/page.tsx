@@ -1,9 +1,8 @@
 "use client";
 
 import React, { Suspense } from "react";
+import Chat from "@/components/Chat";
 import ChatHeader from "@/components/ChatHeader";
-import ChatInput from "@/components/ChatInput";
-import ChatMessages from "@/components/ChatMessages";
 import ConversationList from "@/components/ConversationList";
 import Image from "next/image";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -44,10 +43,7 @@ export default function Page() {
                   <ModelLoader />
                 </Suspense>
               </div>
-              <div className="flex max-h-full min-w-0 flex-col p-10">
-                <ChatMessages />
-                <ChatInput />
-              </div>
+              <Chat />
             </div>
           </main>
         </div>
