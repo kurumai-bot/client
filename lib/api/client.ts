@@ -4,6 +4,7 @@ import { Socket, io } from "socket.io-client";
 import { ApiError } from "./errors";
 import { UUID } from "crypto";
 // TODO: Consider switching to swr
+// TODO: handle server socketio errors
 
 export const apiUrl = "https://server.loukylor.dev/kurumai/";
 
@@ -221,6 +222,10 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
 
   sendMicData(data: ArrayBuffer) {
     this.socketio.emit((OpCodes.SEND_VOICE_DATA as number).toString(), data);
+  }
+
+  sendSetConversation(conversation_id: UUID) {
+    this.socketio.emit((OpCodes.SET_CONVERSATION as number).toString(), conversation_id);
   }
 
   private addMessage(message: Message) {

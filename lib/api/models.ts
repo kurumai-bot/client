@@ -45,7 +45,8 @@ export interface Viseme {
 }
 
 export enum OpCodes {
-  SET_PRESET = 1,
+  ERROR = 0,
+  SET_PRESET,
   REMOVE_PRESET,
   SEND_VOICE_DATA,
   SEND_TEXT_DATA,
@@ -54,7 +55,8 @@ export enum OpCodes {
   FINISH_GEN,
   FINISH_GEN_WAV,
   FINISH,
-  RECEIVE_MESSAGE
+  RECEIVE_MESSAGE,
+  SET_CONVERSATION
 }
 
 export type Emotion = "happy" | "sad" | "angry" | "neutral"

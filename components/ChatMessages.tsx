@@ -27,6 +27,9 @@ export default function ChatMessages() {
     }
 
     client.getMessageHistory(currentConversation.id).then(setMessages);
+
+    // TODO: IDK where the best place to put this is
+    client.sendSetConversation(currentConversation.id);
   }, [client, currentConversation]);
 
   function handleMessage(ev: GenericEvent<Array<Message>>) {
