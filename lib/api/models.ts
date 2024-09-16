@@ -29,7 +29,7 @@ export interface StartMessage {
 
 export interface TTSMessage {
   message: Message
-  expressions: Expression[]
+  expressions: Expression[] | undefined
   emotion: Emotion
   data: Uint8Array
 }

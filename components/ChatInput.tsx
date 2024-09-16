@@ -54,7 +54,6 @@ export default function ChatInput() {
 
       if (inputRef.current.value != "") {
         const content = inputRef.current.value;
-        // TODO: temp
         client.sendMessage(currentConversation!.id, content);
         inputRef.current.value = "";
         inputRef.current.style.height = "";

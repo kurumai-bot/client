@@ -137,6 +137,10 @@ export function ThreeJSModelInternal({
 
   function handleFinishGen(ev: GenericEvent<TTSMessage>) {
     // Each track represents a single blendshape
+    if (ev.data.expressions === undefined) {
+      return;
+    }
+
     const duration = ev.data.expressions.at(-1)!.startTime + 0.1;
     const tracks = new Map<VisemeEnum, [Array<number>, Array<number>]>;
     let lastTrack: [Array<number>, Array<number>] | undefined = undefined;
