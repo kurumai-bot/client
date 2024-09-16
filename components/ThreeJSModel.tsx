@@ -137,7 +137,7 @@ export function ThreeJSModelInternal({
 
   function handleFinishGen(ev: GenericEvent<TTSMessage>) {
     // Each track represents a single blendshape
-    if (ev.data.expressions === undefined) {
+    if (ev.data.expressions.length === 0) {
       return;
     }
 
