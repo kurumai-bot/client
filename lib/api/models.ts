@@ -56,7 +56,9 @@ export enum OpCodes {
   FINISH_GEN_WAV,
   FINISH,
   RECEIVE_MESSAGE,
-  SET_CONVERSATION
+  SET_CONVERSATION,
+  CREATE_CONVERSATION,
+  UPDATE_BOT_USER
 }
 
 export type Emotion = "happy" | "sad" | "angry" | "neutral"
