@@ -80,8 +80,8 @@ input, textarea, .raised-button, .filled-button {
   border: unset;
 }
 .filled-button {
-  background-color: var(--color-primary);
-  color: var(--color-on-primary);
+  background-color: var(--color-primary-container);
+  color: var(--color-on-primary-container);
 }
 
 .react-select__input {
@@ -96,8 +96,7 @@ input:focus, textarea:focus, .raised-button:focus, .filled-button:focus {
   background-color: var(--color-surface-container-highest);
 }
 .filled-button:focus {
-  background-color: var(--color-on-primary-container);
-  box-shadow: 0 0 1px 2px var(--color-on-surface);
+  background-color: var(--color-on-primary);
 }
 .rc-slider-handle:focus {
   box-shadow: 0 0 1px 2px var(--color-primary);
@@ -123,7 +122,7 @@ input:hover, textarea:hover {
   background-color: var(--color-surface-container-highest);
 }
 .filled-button:hover {
-  background-color: var(--color-on-primary-container);
+  background-color: var(--color-on-primary);
 }
 
 /* The slider library poorly supports style (e.g. can't change pseudoelements
