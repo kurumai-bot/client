@@ -7,8 +7,14 @@ import { useContext } from "react";
 export default function Chat() {
   const [isSettingsOpen, _] = useContext(SettingsOpenContext);
   return (
-    <div className="flex max-h-full min-w-0 flex-col p-10">
-      {isSettingsOpen ? <SettingsMenu /> : (<><ChatMessages /><ChatInput /></>)}
-    </div>
+    <>
+      <div className="flex max-h-full min-w-0 flex-col p-10" style={isSettingsOpen ? { display: "none" } : {}}>
+        <ChatMessages />
+        <ChatInput />
+      </div>
+      <div className="flex h-full min-w-0 flex-col p-10" style={isSettingsOpen ? {} : { display: "none" }}>
+        <SettingsMenu />
+      </div>
+    </>
   );
 }

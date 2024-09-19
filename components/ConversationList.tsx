@@ -6,6 +6,13 @@ import ConversationButton from "./ConversationButton";
 import { ConversationContext } from "./ContextProviders";
 import { useClient } from "@/lib/hooks";
 
+// TODO: Redesign this to be bot user and conversations with that bot user e.g.
+// - bot user name
+//   - conversation with bot user
+//   - second conversation with bot user
+// - bot user 2 name
+//   - conversatoin with bot user 2
+// then make the bot user buttons clickable so you can edit them?
 export default function ConversationList() {
   const client = useClient();
   const [currentConversation, setCurrentConveration] = useContext(ConversationContext);

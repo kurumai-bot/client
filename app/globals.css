@@ -63,23 +63,146 @@ body {
   color: var(--color-on-surface);
   background-color: var(--color-background);
   border-color: var(--color-outline-variant);
+  overflow: hidden;
 }
 
-input, textarea {
+input, textarea, .raised-button, .filled-button {
   padding: 0.75rem;
   border-radius: 0.5rem;
   background-color: var(--color-surface-container);
-  border: 1px solid var(--color-outline); 
+  border: 1px solid var(--color-outline);
   resize: none;
   overflow: auto;
+  transition: all 100ms;
+}
+.raised-button {
+  background-color: var(--color-surface-container-high);
+  border: unset;
+}
+.filled-button {
+  background-color: var(--color-primary);
+  color: var(--color-on-primary);
 }
 
-input:active, textarea:focus {
-  background-color: var(--color-secondary-container-high);
+.react-select__input {
+  box-shadow: unset !important;
+}
+input:focus, textarea:focus, .raised-button:focus, .filled-button:focus {
+  background-color: var(--color-surface-container-high);
+  box-shadow: 0 0 1px 1px var(--color-primary);
+  outline: 0px;
+}
+.raised-button:focus {
+  background-color: var(--color-surface-container-highest);
+}
+.filled-button:focus {
+  background-color: var(--color-on-primary-container);
+  box-shadow: 0 0 1px 2px var(--color-on-surface);
+}
+.rc-slider-handle:focus {
+  box-shadow: 0 0 1px 2px var(--color-primary);
+  outline: 0px;
 }
 
-input:disabled, textarea:disabled {
+/* I know this isn't proper but this works for now */
+input:disabled, textarea:disabled, .rc-slider-disabled {
   opacity: 0.38;
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--color-on-surface-variant);
+}
+
+input:hover, textarea:hover {
+  border-color: var(--color-on-surface);
+}
+.rc-slider-handle:hover {
+  background-color: var(--color-on-surface);
+}
+.raised-button:hover {
+  background-color: var(--color-surface-container-highest);
+}
+.filled-button:hover {
+  background-color: var(--color-on-primary-container);
+}
+
+/* The slider library poorly supports style (e.g. can't change pseudoelements
+   like hover or active) so just completely redefine our own, excluding unused
+   elements */
+.rc-slider {
+  position: relative;
+  width: 100%;
+  height: 14px;
+  padding: 5px 0;
+  border-radius: 6px;
+  touch-action: none;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.rc-slider * {
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.rc-slider-rail {
+  position: absolute;
+  width: 100%;
+  height: 6px;
+  background-color: var(--color-surface-variant);
+  border-radius: 6px;
+}
+.rc-slider-track,
+.rc-slider-tracks {
+  position: absolute;
+  height: 6px;
+  background-color: var(--color-primary);
+  border-radius: 6px;
+}
+.rc-slider-track-draggable {
+  z-index: 1;
+  box-sizing: content-box;
+  background-clip: content-box;
+  border-top: 5px solid rgba(0, 0, 0, 0);
+  border-bottom: 5px solid rgba(0, 0, 0, 0);
+  transform: translateY(-5px);
+}
+.rc-slider-handle {
+  position: absolute;
+  z-index: 1;
+  width: 14px;
+  height: 14px;
+  margin-top: -4px;
+  background-color: var(--color-outline);
+  border-radius: 50%;
+  cursor: pointer;
+  cursor: grab;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  touch-action: pan-x;
+  transition: all 100ms, transform 0ms, left 0ms;
+}
+
+.rc-slider-handle-dragging.rc-slider-handle-dragging.rc-slider-handle-dragging,
+.rc-slider-handle:active {
+  scale: 1.15;
+  translate: 7.5%;
+  background-color: var(--color-on-surface);
+  cursor: grabbing;
+}
+
+.rc-slider-handle-dragging.rc-slider-handle-dragging.rc-slider-handle-dragging-delete {
+  opacity: 0;
+}
+
+.rc-slider-step, .rc-slider-mar {
+  display: none;
+}
+
+.rc-slider-disabled .rc-slider-handle,
+.rc-slider-disabled .rc-slider-handle:hover {
+  cursor: inherit;
 }
 
 ::-webkit-scrollbar {
@@ -87,7 +210,6 @@ input:disabled, textarea:disabled {
   background-color: inherit;
 }
 
-/* I don't want to define new colors, so just use this hacky solution */
 ::-webkit-scrollbar-thumb {
   background-color: var(--color-surface-container-high);
 }
@@ -104,6 +226,10 @@ input:disabled, textarea:disabled {
   body {
     scrollbar-color: inherit var(--color-surface-container-high);
   }
+}
+
+hr {
+  border-color: var(--color-outline);
 }
 
 .flex-center {
