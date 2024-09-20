@@ -7,6 +7,7 @@ import { ConversationContext } from "./ContextProviders";
 import LimitedTextArea from "./LimitedTextArea";
 import LoadingSpinner from "./LoadingSpinner";
 import SliderInput from "./SliderInput";
+import { Tooltip } from "react-tooltip";
 import { useClient } from "@/lib/hooks";
 
 
@@ -93,6 +94,10 @@ export default function SettingsMenu() {
           />
           <br />
         </div>
+        <Tooltip id="text-gen-model-tooltip" className="tooltip" delayShow={500}>
+          The text generation model to use<br />
+          Change &quot;Initial Context&quot; over this to customize responses
+        </Tooltip>
 
         <div data-tooltip-id="context-tooltip">
           <label className="block">Initial Context</label>
@@ -105,15 +110,26 @@ export default function SettingsMenu() {
           />
           <br />
         </div>
+        <Tooltip id="context-tooltip" className="tooltip" delayShow={500}>
+          The starting context or instructions for the text generation AI
+        </Tooltip>
 
         <div className="flex flex-col gap-5 xl:flex-row">
           <div className="flex-1" data-tooltip-id="temperature-tooltip">
             <SliderInput label="Temperature" min={0} max={2} defaultValue={1} step={0.01} />
           </div>
+          <Tooltip id="temperature-tooltip" className="tooltip" delayShow={500}>
+            The randomness of the text generation
+          </Tooltip>
 
           <div className="flex-1" data-tooltip-id="tokens-tooltip" >
             <SliderInput label="Max Tokens" min={0} max={4096} defaultValue={2048} step={1} />
           </div>
+          <Tooltip id="tokens-tooltip" className="tooltip" delayShow={500}>
+            The max length of the text generation in tokens<br />
+            More tokens will slow down responses<br />
+            Three tokens is about four words
+          </Tooltip>
         </div>
         <br />
 
@@ -127,6 +143,9 @@ export default function SettingsMenu() {
               classNamePrefix="react-select"
             />
           </div>
+          <Tooltip id="tts-model-tooltip" className="tooltip" delayShow={500}>
+            The text-to-speech model to use to generate speech
+          </Tooltip>
 
           <div className="flex-1" data-tooltip-id="tts-speaker-tooltip">
             <label className="block">Text-to-Speech AI Model Speaker</label>
@@ -137,6 +156,9 @@ export default function SettingsMenu() {
               classNamePrefix="react-select"
             />
           </div>
+          <Tooltip id="tts-speaker-tooltip" className="tooltip" delayShow={500}>
+            The specific voice of the text-to-speech model, if available
+          </Tooltip>
         </div>
         <br />
       </div>

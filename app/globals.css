@@ -231,6 +231,14 @@ hr {
   border-color: var(--color-outline);
 }
 
+.tooltip.react-tooltip {
+  z-index: 2;
+  background-color: var(--color-surface-container-highest);
+  color: var(--color-on-surface);
+  filter: drop-shadow(0 0 1.5px var(--color-primary));
+  text-align: center;
+}
+
 .flex-center {
   height: 100%;
   display: flex;
