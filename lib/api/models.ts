@@ -5,6 +5,20 @@ export interface ApiObject {
   createdAt: Date
 }
 
+export interface AvailableModels {
+  textGen: string[]
+  tts: Record<string, string[]>
+}
+
+export interface BotUser extends User {
+  creatorId?: UUID
+  lastModified: Date
+  textGenModelName: string
+  textGenStartingContext: string
+  ttsModelName: string
+  ttsSpeakerName: string
+}
+
 export interface Conversation extends ApiObject {
   name: string
   userId: UUID

@@ -1,4 +1,4 @@
-import { Conversation, Emotion, Expression, Message, OpCodes, StartMessage, TTSMessage, User } from "./models";
+import { AvailableModels, BotUser, Conversation, Emotion, Expression, Message, OpCodes, StartMessage, TTSMessage, User } from "./models";
 import GenericEvent, { GenericEventTarget } from "../genericEvent";
 import { Socket, io } from "socket.io-client";
 import { ApiError } from "./errors";
@@ -170,6 +170,29 @@ export class Client extends GenericEventTarget<Client, ClientEventMap> {
     return this._currentUser!;
   }
 
+  async getAvailableModels() {
+    const res = await makeRequest(
+      apiUrl + "user/available_models",
+      "get"
+    );
+
+    const resObj = objSnakeToCamel(await res.json(), 0);
+    return resObj as AvailableModels;
+  }
+
+  async getBotUser(botUserId: UUID) {
+    const res = await makeRequest(
+      apiUrl + `bot_user/${botUserId}`,
+      "get"
+    );
+
+    const botUserObj = objSnakeToCamel(await res.json());
+    botUserObj["createdAt"] = new Date(botUserObj["createdAt"]);
+    botUserObj["lastModified"] = new Date(botUserObj["lastModified"]);
+
+    return await botUserObj as BotUser;
+  }
+
   async sendMessage(conversationId: UUID, content: string) {
     const res = await makeRequest(
       apiUrl + `conversations/${conversationId}/messages`,
@@ -284,7 +307,7 @@ export async function makeRequest(
 }
 
 const snakeCaseRegex = /(?<=.)_+./gm;
-function objSnakeToCamel(object: any) {
+function objSnakeToCamel(object: any, maxDepth: number = Number.POSITIVE_INFINITY) {
   for (let key in object) {
     // Remove key and convert it to camel, then readd the key to the object
     const val = object[key];
@@ -295,8 +318,8 @@ function objSnakeToCamel(object: any) {
     );
 
     // Change keys recursively (this will also handle arrays)
-    if (val instanceof Object) {
-      objSnakeToCamel(val);
+    if (val instanceof Object && maxDepth > 0) {
+      objSnakeToCamel(val, maxDepth - 1);
     }
 
     object[key] = val;

@@ -1,12 +1,18 @@
 "use client";
 
+import { AvailableModels, BotUser } from "@/lib/api/models";
 import Select, { StylesConfig } from "react-select";
+import { useContext, useEffect, useState } from "react";
+import { ConversationContext } from "./ContextProviders";
 import LimitedTextArea from "./LimitedTextArea";
+import LoadingSpinner from "./LoadingSpinner";
 import SliderInput from "./SliderInput";
+import { useClient } from "@/lib/hooks";
 
 
 // TODO: maybe switch to css instead of this config
 // TODO: also maybe scss?
+// TODO: Expand on the initial context tooltip, probably with an faq of somekind
 const selectStyle: StylesConfig = {
   container: (baseStyles, { isDisabled }) => ({
     ...baseStyles,
@@ -53,6 +59,23 @@ const selectStyle: StylesConfig = {
 
 
 export default function SettingsMenu() {
+  const client = useClient();
+  const [currentConversation, _] = useContext(ConversationContext);
+  const [botUser, setBotUser] = useState<BotUser | undefined>(undefined);
+  const [availableModels, setAvailableModels] = useState<AvailableModels | undefined>(undefined);
+
+  useEffect(() => {
+    client.getAvailableModels().then(setAvailableModels);
+
+    if (currentConversation !== undefined) {
+      client.getBotUser(currentConversation.botUserId).then(setBotUser);
+    }
+  }, [client, currentConversation]);
+
+  if (botUser === undefined || availableModels === undefined) {
+    return (<LoadingSpinner />);
+  }
+
   return (
     <div className="flex h-full flex-col">
       <div className="-mx-2 flex-1 overflow-y-auto overflow-x-visible px-2">
@@ -60,45 +83,59 @@ export default function SettingsMenu() {
           Bot Settings
         </h1>
 
-        <label className="block">Text Generation AI Model</label>
-        <Select options={[
-          { value: "what", label: "what" },
-          { value: "how", label: "how" },
-          { value: "who", label: "who" }
-        ]} styles={selectStyle} classNamePrefix="react-select" />
-        <br />
+        <div data-tooltip-id="text-gen-model-tooltip">
+          <label className="block">Text Generation AI Model</label>
+          <Select
+            defaultValue={{ value: botUser.textGenModelName, label: botUser.textGenModelName }}
+            options={availableModels.textGen.map((model) => ({ value: model, label: model }))}
+            styles={selectStyle}
+            classNamePrefix="react-select"
+          />
+          <br />
+        </div>
 
-        <label className="block">Initial Context</label>
-        <LimitedTextArea className="block w-full" maxLength={4096} rows={3} placeholder="Enter instructions for your AI here!" />
-        <br />
+        <div data-tooltip-id="context-tooltip">
+          <label className="block">Initial Context</label>
+          <LimitedTextArea
+            className="block w-full"
+            defaultValue={botUser.textGenStartingContext}
+            maxLength={4096}
+            rows={3}
+            placeholder="Enter instructions for your AI here!"
+          />
+          <br />
+        </div>
 
         <div className="flex flex-col gap-5 xl:flex-row">
-          <div className="flex-1">
+          <div className="flex-1" data-tooltip-id="temperature-tooltip">
             <SliderInput label="Temperature" min={0} max={2} defaultValue={1} step={0.01} />
           </div>
-          <div className="flex-1">
+
+          <div className="flex-1" data-tooltip-id="tokens-tooltip" >
             <SliderInput label="Max Tokens" min={0} max={4096} defaultValue={2048} step={1} />
           </div>
         </div>
         <br />
 
         <div className="flex flex-col gap-5 xl:flex-row">
-          <div className="flex-1">
+          <div className="flex-1" data-tooltip-id="tts-model-tooltip">
             <label className="block">Text-to-Speech AI Model</label>
-            <Select options={[
-              { value: "what", label: "what" },
-              { value: "how", label: "how" },
-              { value: "who", label: "who" }
-            ]} styles={selectStyle} classNamePrefix="react-select" />
+            <Select
+              defaultValue={{ value: botUser.ttsModelName, label: botUser.ttsModelName }}
+              options={Object.keys(availableModels.tts).map((model) => ({ value: model, label: model }))}
+              styles={selectStyle}
+              classNamePrefix="react-select"
+            />
           </div>
 
-          <div className="flex-1">
+          <div className="flex-1" data-tooltip-id="tts-speaker-tooltip">
             <label className="block">Text-to-Speech AI Model Speaker</label>
-            <Select options={[
-              { value: "what", label: "what" },
-              { value: "how", label: "how" },
-              { value: "who", label: "who" }
-            ]} styles={selectStyle} classNamePrefix="react-select" />
+            <Select
+              defaultValue={{ value: botUser.ttsSpeakerName, label: botUser.ttsSpeakerName }}
+              options={Object.values(availableModels.tts[botUser.ttsModelName]).map((speaker) => ({ value: speaker, label: speaker  }))}
+              styles={selectStyle}
+              classNamePrefix="react-select"
+            />
           </div>
         </div>
         <br />
