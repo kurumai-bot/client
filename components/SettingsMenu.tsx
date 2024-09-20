@@ -1,6 +1,7 @@
 "use client";
 
 import Select, { StylesConfig } from "react-select";
+import LimitedTextArea from "./LimitedTextArea";
 import SliderInput from "./SliderInput";
 
 
@@ -53,8 +54,8 @@ const selectStyle: StylesConfig = {
 
 export default function SettingsMenu() {
   return (
-    <div className="flex flex-col h-full">
-      <div className="overflow-y-auto overflow-x-visible flex-1 px-2 mx-[-0.5rem]">
+    <div className="flex h-full flex-col">
+      <div className="-mx-2 flex-1 overflow-y-auto overflow-x-visible px-2">
         <h1 className="mb-5 border-b border-[color:var(--color-outline)] text-2xl font-semibold">
           Bot Settings
         </h1>
@@ -68,7 +69,7 @@ export default function SettingsMenu() {
         <br />
 
         <label className="block">Initial Context</label>
-        <textarea className="block w-full" placeholder="Enter instructions for your AI here!"></textarea>
+        <LimitedTextArea className="block w-full" maxLength={4096} rows={3} placeholder="Enter instructions for your AI here!" />
         <br />
 
         <div className="flex flex-col gap-5 xl:flex-row">
@@ -104,7 +105,7 @@ export default function SettingsMenu() {
       </div>
       <div className="basis-10">
         <hr />
-        <div className="py-5 flex justify-between">
+        <div className="flex justify-between py-5">
           <button className="raised-button">Cancel</button>
           <button className="filled-button">Save</button>
         </div>

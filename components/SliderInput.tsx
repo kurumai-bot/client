@@ -2,11 +2,12 @@ import { useRef, useState } from "react";
 import Slider from "rc-slider";
 
 export interface SliderInputProps {
-  label: string
-  min: number
-  max: number
-  defaultValue: number
-  step: number
+  label?: string
+  min?: number
+  max?: number
+  defaultValue?: number
+  step?: number
+  onChange?: ((value: number) => void)
 }
 
 export default function SliderInput({
@@ -14,8 +15,9 @@ export default function SliderInput({
   min = 0,
   max = 100,
   defaultValue = 50,
-  step = 1
-}: SliderInputProps) {
+  step = 1,
+  onChange = undefined
+}: SliderInputProps = {}) {
   const inputRef = useRef<HTMLInputElement>(undefined!);
   const [value, setValue] = useState(defaultValue);
 
@@ -23,6 +25,7 @@ export default function SliderInput({
     const valNumber = value as number;
     inputRef.current.value = valNumber.toString();
     setValue(valNumber);
+    onChange?.bind(valNumber);
   }
 
   function inputOnInput() {
@@ -37,10 +40,11 @@ export default function SliderInput({
     }
 
     setValue(val);
+    onChange?.bind(val);
   }
 
   function inputOnBlur() {
-    // Set input value to whatever value we have stored, this prevents invalid inputs and 
+    // Set input value to whatever value we have stored, this prevents invalid inputs and
     // normalizes all inputs to look the same
     inputRef.current.value = value.toString();
   }

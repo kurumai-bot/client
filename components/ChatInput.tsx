@@ -3,6 +3,7 @@
 import { useContext, useEffect, useRef } from "react";
 import { ConversationContext } from "./ContextProviders";
 import GenericEvent from "@/lib/genericEvent";
+import LimitedTextArea from "./LimitedTextArea";
 import Microphone from "@/lib/microphone";
 import { StartMessage } from "@/lib/api/models";
 import { useClient } from "@/lib/hooks";
@@ -65,12 +66,6 @@ export default function ChatInput() {
     }
   }
 
-  function handleOnInput(_: React.FormEvent) {
-    // Make text area expand when text overflows
-    inputRef.current.style.height = "";
-    inputRef.current.style.height = inputRef.current.scrollHeight + 3 + "px";
-  }
-
   function setInputState(enabled: boolean) {
     inputRef.current.disabled = !enabled;
     inputRef.current.placeholder = enabled
@@ -92,8 +87,16 @@ export default function ChatInput() {
   }
 
   return (
-    <div className="flex max-h-[40%] basis-auto items-center gap-3">
-      <textarea ref={inputRef} onKeyDown={handleInputKeyDown} onInput={handleOnInput} rows={1} placeholder="Say something" className="max-h-full flex-1"/>
+    <div className="flex max-h-[40%] items-center gap-3">
+      <LimitedTextArea
+        ref={inputRef}
+        onKeyDown={handleInputKeyDown}
+        rows={1}
+        placeholder="Say something"
+        divClassName="max-h-20 w-full"
+        className="max-h-full w-full"
+        maxLength={4096}
+      />
       <div className="size-12 bg-green-100" onClick={handleMicrophoneButtonClick}>
 
       </div>
